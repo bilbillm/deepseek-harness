@@ -5,18 +5,33 @@
  * ThemePresenter owns after the client plugin tree activates.
  */
 
-import { DEFAULT_PREFERENCE, type ThemePreference } from './theme-settings.ts'
+import {
+  DEFAULT_PREFERENCE, THEME_BOOTSTRAP_PREFERENCE_ATTRIBUTE,
+  THEME_BOOTSTRAP_TOKENS_ATTRIBUTE, type ThemePreference,
+} from './theme-settings.ts'
+import { BUILTIN_THEMES } from './builtin-themes.ts'
 
 /** Build the inline script for one schema-validated built-in preference. */
 function bootThemeScript(preference: ThemePreference): string {
+  const tokens = preference === 'system'
+    ? {}
+    : BUILTIN_THEMES.find(theme => theme.id === preference)?.tokens ?? {}
   return `<script>(() => {
   const preference = ${JSON.stringify(preference)}
+  const tokens = ${JSON.stringify(tokens)}
   const systemDark = preference === 'system'
     && typeof matchMedia !== 'undefined'
     && matchMedia('(prefers-color-scheme: dark)').matches
-  const dark = preference === 'dark' || systemDark
+  const themeId = preference === 'system' ? (systemDark ? 'dark' : 'light') : preference
+  const dark = themeId === 'dark' || themeId === 'angelina-dark'
   document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
   document.body.toggleAttribute('data-ds-dark-theme', dark)
+  document.body.setAttribute('data-ds-theme', themeId)
+  document.body.setAttribute(${JSON.stringify(THEME_BOOTSTRAP_PREFERENCE_ATTRIBUTE)}, preference)
+  document.body.setAttribute(${JSON.stringify(THEME_BOOTSTRAP_TOKENS_ATTRIBUTE)}, Object.keys(tokens).join(' '))
+  for (const [name, value] of Object.entries(tokens)) {
+    document.body.style.setProperty(name, value)
+  }
 })()</script>`
 }
 

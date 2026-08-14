@@ -6,7 +6,14 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
-import { DARK_ATTRIBUTE, ThemePresenter } from '@deepseek-ai/dsh-client-ui-layout/src/client/theme-presenter.ts'
+import {
+  THEME_BOOTSTRAP_TOKENS_ATTRIBUTE as HOST_BOOTSTRAP_TOKENS_ATTRIBUTE,
+} from '@deepseek-ai/dsh-client-ui-theme/src/theme-settings.ts'
+import {
+  DARK_ATTRIBUTE, THEME_ATTRIBUTE,
+  THEME_BOOTSTRAP_TOKENS_ATTRIBUTE as PRESENTER_BOOTSTRAP_TOKENS_ATTRIBUTE,
+  ThemePresenter,
+} from '@deepseek-ai/dsh-client-ui-layout/src/client/theme-presenter.ts'
 
 const LIGHT_THEME_COLOR = 'rgb(255, 255, 255)'
 const DARK_THEME_COLOR = 'rgb(21, 21, 23)'
@@ -29,6 +36,8 @@ beforeEach(() => {
   clearThemePresentation()
   document.documentElement.style.removeProperty('color-scheme')
   document.body.removeAttribute(DARK_ATTRIBUTE)
+  document.body.removeAttribute(THEME_ATTRIBUTE)
+  document.body.removeAttribute(PRESENTER_BOOTSTRAP_TOKENS_ATTRIBUTE)
   document.body.removeAttribute('style')
   const style = document.createElement('style')
   style.dataset.themePresenterTest = ''
@@ -42,11 +51,16 @@ beforeEach(() => {
 afterEach(clearThemePresentation)
 
 describe('ThemePresenter', () => {
+  it('shares the Host bootstrap token handoff attribute without a runtime value import', () => {
+    expect(PRESENTER_BOOTSTRAP_TOKENS_ATTRIBUTE).toBe(HOST_BOOTSTRAP_TOKENS_ATTRIBUTE)
+  })
+
   it('light scheme sets root color-scheme and leaves the dark attribute absent', () => {
     const presenter = new ThemePresenter()
     presenter.apply(snapshot('light'))
     expect(document.documentElement.style.colorScheme).toBe('light')
     expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(false)
+    expect(document.body.getAttribute(THEME_ATTRIBUTE)).toBe('light-test')
     expect(themeColorMeta()?.content).toBe(LIGHT_THEME_COLOR)
   })
 
@@ -56,10 +70,12 @@ describe('ThemePresenter', () => {
     const meta = themeColorMeta()
     expect(document.documentElement.style.colorScheme).toBe('dark')
     expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(true)
+    expect(document.body.getAttribute(THEME_ATTRIBUTE)).toBe('dark-test')
     expect(meta?.content).toBe(DARK_THEME_COLOR)
     presenter.apply(snapshot('light'))
     expect(document.documentElement.style.colorScheme).toBe('light')
     expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(false)
+    expect(document.body.getAttribute(THEME_ATTRIBUTE)).toBe('light-test')
     expect(themeColorMeta()).toBe(meta)
     expect(meta?.content).toBe(LIGHT_THEME_COLOR)
     expect(document.head.querySelectorAll('meta[name="theme-color"]')).toHaveLength(1)
@@ -76,6 +92,22 @@ describe('ThemePresenter', () => {
     expect(document.body.style.getPropertyValue('--dsw-alias-fg')).toBe('')
   })
 
+  it('retracts Host bootstrap tokens before applying the first client snapshot', () => {
+    document.body.style.setProperty('--dsw-alias-bg', '#111')
+    document.body.style.setProperty('--dsw-alias-fg', '#eee')
+    document.body.style.setProperty('--foreign', 'kept')
+    document.body.setAttribute(
+      PRESENTER_BOOTSTRAP_TOKENS_ATTRIBUTE,
+      '--dsw-alias-bg --dsw-alias-fg',
+    )
+    const presenter = new ThemePresenter()
+    presenter.apply(snapshot('light', { '--dsw-alias-bg': '#fff' }))
+    expect(document.body.hasAttribute(PRESENTER_BOOTSTRAP_TOKENS_ATTRIBUTE)).toBe(false)
+    expect(document.body.style.getPropertyValue('--dsw-alias-bg')).toBe('#fff')
+    expect(document.body.style.getPropertyValue('--dsw-alias-fg')).toBe('')
+    expect(document.body.style.getPropertyValue('--foreign')).toBe('kept')
+  })
+
   it('dispose removes color-scheme, the attribute, and every applied variable, sparing foreign inline styles', () => {
     document.body.style.setProperty('--foreign', 'kept')
     const presenter = new ThemePresenter()
@@ -84,6 +116,7 @@ describe('ThemePresenter', () => {
     presenter.dispose()
     expect(document.documentElement.style.colorScheme).toBe('')
     expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(false)
+    expect(document.body.hasAttribute(THEME_ATTRIBUTE)).toBe(false)
     expect(document.body.style.getPropertyValue('--dsw-alias-bg')).toBe('')
     expect(document.body.style.getPropertyValue('--foreign')).toBe('kept')
     expect(meta?.isConnected).toBe(false)

@@ -1,6 +1,6 @@
 /**
  * Browser theme registry over the `--dsw-*` token stylesheets. The service
- * owns the live theme preference (light/dark/system), resolves `system` through
+ * owns the live theme preference, resolves `system` through
  * `prefers-color-scheme`, and publishes immutable snapshots; it never touches
  * the DOM — ui-layout's presenter consumes the resolved snapshot. The Host
  * settings scope loads and stores the preference in the user-settings
@@ -19,8 +19,11 @@ import type { AppearanceRowInjected } from './AppearanceRow.tsx'
 import { AppearanceRow } from './AppearanceRow.tsx'
 import { createAppearanceRowStore } from './settings-store.ts'
 import { en, zh, type ThemeKey } from './locales.ts'
+import { BUILTIN_THEMES, resolveBuiltinThemeId } from '../builtin-themes.ts'
+import type { ThemeDefinition, ThemeTokens } from '../theme-definition.ts'
 import {
-  DEFAULT_PREFERENCE, isThemePreference, THEME_PREFERENCE_FIELD, THEME_SETTINGS_NAMESPACE,
+  DEFAULT_PREFERENCE, isThemePreference, THEME_BOOTSTRAP_PREFERENCE_ATTRIBUTE,
+  THEME_PREFERENCE_FIELD, THEME_SETTINGS_NAMESPACE,
   type ThemePreference, type ThemeSettings,
 } from '../theme-settings.ts'
 
@@ -28,6 +31,7 @@ export type { AppearanceRowComponentProps, AppearanceRowInjected } from './Appea
 export type { AppearanceRowState } from './settings-store.ts'
 export type { ThemeKey } from './locales.ts'
 export type { ThemePreference, ThemeSettings } from '../theme-settings.ts'
+export type { ThemeDefinition, ThemeTokens } from '../theme-definition.ts'
 
 /** Namespace owning this feature's settings-row copy. */
 export const SETTINGS_NS = 'settings.theme'
@@ -38,9 +42,6 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     'settings.theme': ThemeKey
   }
 }
-
-/** Theme token dictionary: --dsw-alias-* overrides keyed by variable name. */
-export type ThemeTokens = Record<string, string>
 
 /**
  * One override-layer token value: both palette modes are mandatory (repeat
@@ -56,19 +57,6 @@ export interface ThemeTokenModes {
 
 /** Override-layer dictionary: token names to per-mode value pairs. */
 export type ThemeTokenOverrides = Record<string, ThemeTokenModes>
-
-/** One selectable theme: id, dark/light semantics, and alias-token overrides. */
-export interface ThemeDefinition {
-  /** Theme id (the setTheme argument for concrete themes). */
-  id: string
-  /**
-   * Which base palette this theme builds on. The presenter switches
-   * `body[data-ds-dark-theme]` from this field — never from the id.
-   */
-  colorScheme: 'light' | 'dark'
-  /** Alias-layer overrides applied as inline CSS variables over the base palette. */
-  tokens: ThemeTokens
-}
 
 /** Immutable theme state published on every change. */
 export interface ThemeSnapshot {
@@ -115,11 +103,6 @@ declare module '@deepseek-ai/cordis' {
   }
 }
 
-const BUILTIN_THEMES: readonly ThemeDefinition[] = Object.freeze([
-  Object.freeze({ id: 'light', colorScheme: 'light' as const, tokens: Object.freeze({}) }),
-  Object.freeze({ id: 'dark', colorScheme: 'dark' as const, tokens: Object.freeze({}) }),
-])
-
 const BUILTIN_INSPECT_TOKENS: readonly ThemeTokenInspection[] = Object.freeze([
   { name: '--dsw-alias-bg-base', description: 'Application base background.', valueType: 'CSS color', requiresLightAndDark: true, cssVariable: '--dsw-alias-bg-base' },
   { name: '--dsw-alias-bg-layer-1', description: 'Primary raised surface background.', valueType: 'CSS color', requiresLightAndDark: true, cssVariable: '--dsw-alias-bg-layer-1' },
@@ -137,9 +120,9 @@ const BUILTIN_INSPECT_TOKENS: readonly ThemeTokenInspection[] = Object.freeze([
 ])
 
 /**
- * Theme registry and preference owner. `light`/`dark` are built in (the base
- * stylesheets carry both palettes); third-party themes register alias-layer
- * overrides. Reads go through {@link getTheme}; preference writes only
+ * Theme registry and preference owner. The neutral pair and Angelina pair
+ * are built in; third-party themes register alias-layer overrides. Reads go
+ * through {@link getTheme}; preference writes only
  * through {@link setTheme}; continuous sync only through the `theme/change`
  * event. {@link overrideTokens} stacks partial token layers over the active
  * theme without touching the registry.
@@ -163,11 +146,16 @@ export class ThemeRuntime {
    * @param ctx - owning context (change events are emitted on it; the
    * media-query and scope listeners are released through ctx.effect on dispose).
    * @param host - durable preference scope owned by the same plugin.
+   * @param initialPreference - Host-rendered preference used before the async scope read settles.
    */
-  constructor(ctx: Context, host: SettingsScope<ThemeSettings>) {
+  constructor(
+    ctx: Context,
+    host: SettingsScope<ThemeSettings>,
+    initialPreference: ThemePreference = DEFAULT_PREFERENCE,
+  ) {
     this.ctx = ctx
     this.host = host
-    this.preference = DEFAULT_PREFERENCE
+    this.preference = initialPreference
     // Non-browser runs (node e2e booting the client tree) have no matchMedia.
     this.media = typeof matchMedia === 'undefined' ? undefined : matchMedia('(prefers-color-scheme: dark)')
     this.snapshot = this.buildSnapshot()
@@ -290,9 +278,7 @@ export class ThemeRuntime {
   }
 
   private buildSnapshot(): ThemeSnapshot {
-    const resolvedId = this.preference === 'system'
-      ? (this.media?.matches === true ? 'dark' : 'light')
-      : this.preference
+    const resolvedId = resolveBuiltinThemeId(this.preference, this.media?.matches === true)
     // Both built-ins always exist; a registered preference id resolves or has
     // been reset by its disposer, so the lookup cannot miss.
     const active = this.themes.find(t => t.id === resolvedId)
@@ -375,6 +361,14 @@ function dynamicToken(name: string): ThemeTokenInspection {
  */
 export const inject = ['slots', 'locale', 'connection', 'remote', 'settingsScope']
 
+/** Consume the Host-rendered preference without coupling ThemeRuntime to the DOM. */
+function consumeBootstrapPreference(): ThemePreference {
+  if (typeof document === 'undefined') return DEFAULT_PREFERENCE
+  const value = document.body.getAttribute(THEME_BOOTSTRAP_PREFERENCE_ATTRIBUTE)
+  document.body.removeAttribute(THEME_BOOTSTRAP_PREFERENCE_ATTRIBUTE)
+  return isThemePreference(value) ? value : DEFAULT_PREFERENCE
+}
+
 /**
  * Client plugin body: provide the theme service and register the
  * feature-owned Appearance preference row into the General section's item
@@ -383,7 +377,7 @@ export const inject = ['slots', 'locale', 'connection', 'remote', 'settingsScope
  */
 export function apply(ctx: ClientContext): void {
   const host = ctx.settingsScope.bind<ThemeSettings>({ namespace: THEME_SETTINGS_NAMESPACE })
-  const theme = new ThemeRuntime(ctx, host)
+  const theme = new ThemeRuntime(ctx, host, consumeBootstrapPreference())
   ctx.provide('theme', theme)
 
   ctx.effect(() => ctx.locale.register(SETTINGS_NS, { zh, en }), 'ui-theme: settings row dictionaries')

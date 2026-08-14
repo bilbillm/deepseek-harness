@@ -29,7 +29,9 @@ describe('ThemeRuntime', () => {
     // jsdom matchMedia is absent; system resolves to light.
     expect(snapshot.active.id).toBe('light')
     expect(snapshot.active.colorScheme).toBe('light')
-    expect(snapshot.themes.map(t => t.id)).toEqual(['light', 'dark'])
+    expect(snapshot.themes.map(t => t.id)).toEqual([
+      'light', 'dark', 'angelina-light', 'angelina-dark',
+    ])
   })
 
   it('setTheme switches, writes through the scope, republishes, and keeps DOM untouched', () => {
@@ -46,6 +48,30 @@ describe('ThemeRuntime', () => {
     theme.setTheme('dark')
     expect(events).toHaveLength(1)
     expect(host.set).toHaveBeenCalledOnce()
+  })
+
+  it('ships persistable Angelina themes with their own schemes and semantic tokens', () => {
+    const { theme, host } = make()
+    theme.setTheme('angelina-light')
+    expect(theme.getTheme().active).toMatchObject({
+      id: 'angelina-light',
+      colorScheme: 'light',
+      tokens: {
+        '--dsw-alias-bg-base': '#ebe8e3',
+        '--dsw-alias-brand-primary': '#9e2f2e',
+      },
+    })
+    expect(host.set).toHaveBeenLastCalledWith('preference', 'angelina-light')
+    theme.setTheme('angelina-dark')
+    expect(theme.getTheme().active).toMatchObject({
+      id: 'angelina-dark',
+      colorScheme: 'dark',
+      tokens: {
+        '--dsw-alias-bg-base': '#080d13',
+        '--dsw-alias-brand-primary': '#c85b55',
+      },
+    })
+    expect(host.set).toHaveBeenLastCalledWith('preference', 'angelina-dark')
   })
 
   it('adopts a published Host section without writing it back', () => {
@@ -75,12 +101,16 @@ describe('ThemeRuntime', () => {
   it('registered themes join the snapshot; disposing the active one resets to default', () => {
     const { theme, events, host } = make()
     const dispose = theme.register({ id: 'sepia', colorScheme: 'light', tokens: { '--dsw-alias-bg-base': 'red' } })
-    expect(theme.getTheme().themes.map(t => t.id)).toEqual(['light', 'dark', 'sepia'])
+    expect(theme.getTheme().themes.map(t => t.id)).toEqual([
+      'light', 'dark', 'angelina-light', 'angelina-dark', 'sepia',
+    ])
     theme.setTheme('sepia')
     expect(theme.getTheme().active.tokens['--dsw-alias-bg-base']).toBe('red')
     dispose()
     expect(theme.getTheme().preference).toBe('system')
-    expect(theme.getTheme().themes.map(t => t.id)).toEqual(['light', 'dark'])
+    expect(theme.getTheme().themes.map(t => t.id)).toEqual([
+      'light', 'dark', 'angelina-light', 'angelina-dark',
+    ])
     // Custom ids are in-process extension themes; only the built-in product
     // preferences cross the Host settings schema.
     expect(host.set).not.toHaveBeenCalled()

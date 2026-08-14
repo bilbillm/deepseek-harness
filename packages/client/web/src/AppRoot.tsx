@@ -37,7 +37,7 @@ export function AppRoot(props: AppRootProps) {
   const loud = error !== undefined || failed.length > 0
 
   return (
-    <div className={css.boot}>
+    <div className={css.boot} data-ds-boot="">
       <div className={css.card}>
         <div className={css.wordmark}>HARNESS</div>
         {!loud

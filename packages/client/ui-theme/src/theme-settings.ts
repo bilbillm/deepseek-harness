@@ -3,13 +3,21 @@
 import z from '@deepseek-ai/schemastery'
 
 /** Built-in preferences accepted at the registry and settings boundaries. */
-export const THEME_PREFERENCES = ['light', 'dark', 'system'] as const
+export const THEME_PREFERENCES = [
+  'light', 'dark', 'system', 'angelina-light', 'angelina-dark',
+] as const
 
 /** Settings namespace owned by the theme plugin. */
 export const THEME_SETTINGS_NAMESPACE = 'ui-theme'
 
 /** Field carrying the selected built-in theme preference. */
 export const THEME_PREFERENCE_FIELD = 'preference'
+
+/** Transient body attribute carrying the Host-rendered initial preference. */
+export const THEME_BOOTSTRAP_PREFERENCE_ATTRIBUTE = 'data-ds-theme-preference'
+
+/** Transient body attribute listing inline tokens written by the Host bootstrap. */
+export const THEME_BOOTSTRAP_TOKENS_ATTRIBUTE = 'data-ds-theme-bootstrap-tokens'
 
 /** Theme preference persisted by the product Appearance row. */
 export type ThemePreference = typeof THEME_PREFERENCES[number]

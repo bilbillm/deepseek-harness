@@ -1,0 +1,126 @@
+/* Angelina theme imagery belongs to the global theme owner. Layout and
+ * conversation expose theme-neutral state markers; no feature stylesheet
+ * branches on a theme id. */
+
+body[data-ds-theme='angelina-light'],
+body[data-ds-theme='angelina-dark'] {
+  --dsh-angelina-hero-image: none;
+  --dsh-angelina-thread-image: none;
+  --dsh-angelina-hero-position: 68% 42%;
+  --dsh-angelina-thread-position: 68% 42%;
+  --dsh-angelina-app-scrim: transparent;
+  --dsh-angelina-thread-scrim: transparent;
+
+  background-color: var(--dsw-alias-bg-base);
+  background-image: var(--dsh-angelina-hero-image);
+  background-position: var(--dsh-angelina-hero-position);
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+body[data-ds-theme='angelina-light'] {
+  --dsh-angelina-hero-image: url('./assets/angelina-light-hero.png');
+  --dsh-angelina-thread-image: url('./assets/angelina-light-thread.jpg');
+  --dsh-angelina-app-scrim: linear-gradient(90deg, rgb(235 232 227 / 92%) 0 20%, rgb(235 232 227 / 18%) 54%, rgb(235 232 227 / 6%) 100%);
+  --dsh-angelina-thread-scrim: linear-gradient(90deg, rgb(235 232 227 / 94%) 0 35%, rgb(235 232 227 / 74%) 68%, rgb(235 232 227 / 58%) 100%);
+}
+
+body[data-ds-theme='angelina-dark'] {
+  --dsh-angelina-hero-image: url('./assets/angelina-dark-hero.png');
+  --dsh-angelina-thread-image: url('./assets/angelina-dark-thread.jpg');
+  --dsh-angelina-hero-position: 74% 42%;
+  --dsh-angelina-thread-position: 74% 42%;
+  --dsh-angelina-app-scrim: linear-gradient(90deg, rgb(8 13 19 / 94%) 0 20%, rgb(8 13 19 / 34%) 54%, rgb(8 13 19 / 12%) 100%);
+  --dsh-angelina-thread-scrim: linear-gradient(90deg, rgb(8 13 19 / 96%) 0 35%, rgb(8 13 19 / 82%) 68%, rgb(8 13 19 / 68%) 100%);
+}
+
+[data-preview='angelina-light'] {
+  --dsh-theme-preview-image: url('./assets/angelina-light-hero.png');
+  --dsh-theme-preview-position: 68% 42%;
+  --dsh-theme-preview-rail: rgb(8 13 19 / 48%);
+  --dsh-theme-preview-rail-border: rgb(255 255 255 / 12%);
+  --dsh-theme-preview-panel: rgb(251 250 248 / 78%);
+}
+
+[data-preview='angelina-dark'] {
+  --dsh-theme-preview-image: url('./assets/angelina-dark-hero.png');
+  --dsh-theme-preview-position: 74% 42%;
+  --dsh-theme-preview-rail: rgb(8 13 19 / 58%);
+  --dsh-theme-preview-rail-border: rgb(255 255 255 / 12%);
+  --dsh-theme-preview-panel: rgb(17 24 32 / 82%);
+}
+
+body[data-ds-theme^='angelina-'] [data-ds-app-frame] {
+  background: var(--dsh-angelina-app-scrim), var(--dsh-angelina-hero-image) var(--dsh-angelina-hero-position) / cover fixed;
+}
+
+body[data-ds-theme^='angelina-'] [data-ds-conversation-column] {
+  background: transparent;
+}
+
+body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase] {
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: var(--dsh-angelina-hero-position);
+  background-size: cover;
+}
+
+body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='hero'],
+body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='settling'] {
+  background-image: var(--dsh-angelina-app-scrim), var(--dsh-angelina-hero-image);
+}
+
+body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='active'] {
+  background-image: var(--dsh-angelina-thread-scrim), var(--dsh-angelina-thread-image);
+  background-position: center, var(--dsh-angelina-thread-position);
+}
+
+body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='hero'] [data-ds-composer-mode='hero'] {
+  align-self: flex-start;
+  width: min(62%, calc(var(--dsh-composer-card-max-width) + 2 * var(--dsh-composer-side-clearance)));
+  margin-left: clamp(16px, 5vw, 72px);
+}
+
+body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='hero'] svg[class*='heroGlow'] {
+  opacity: 0;
+}
+
+body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='active'] [data-conversation-scroll] {
+  background: color-mix(in srgb, var(--dsw-alias-bg-base) 34%, transparent);
+  backdrop-filter: blur(1.5px);
+}
+
+body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='active'] [data-composer-seat] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--dsw-alias-bg-base) 0%, transparent) 0,
+    color-mix(in srgb, var(--dsw-alias-bg-base) 88%, transparent) 36px
+  );
+}
+
+@media (max-width: 900px) {
+  body[data-ds-theme^='angelina-'] {
+    --dsh-angelina-hero-position: 68% 42%;
+    --dsh-angelina-thread-position: 68% 42%;
+  }
+
+  body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='hero'] [data-ds-composer-mode='hero'] {
+    align-self: center;
+    width: min(calc(var(--dsh-composer-card-max-width) + 2 * var(--dsh-composer-side-clearance)), 100%);
+    margin-left: 0;
+  }
+
+  body[data-ds-theme='angelina-light'] {
+    --dsh-angelina-app-scrim: linear-gradient(180deg, rgb(235 232 227 / 58%) 0 38%, rgb(235 232 227 / 92%) 72% 100%);
+  }
+
+  body[data-ds-theme='angelina-dark'] {
+    --dsh-angelina-app-scrim: linear-gradient(180deg, rgb(8 13 19 / 54%) 0 38%, rgb(8 13 19 / 94%) 72% 100%);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='active'] [data-conversation-scroll] {
+    backdrop-filter: none;
+  }
+}

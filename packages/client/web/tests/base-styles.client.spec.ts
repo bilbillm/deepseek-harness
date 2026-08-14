@@ -5,6 +5,7 @@
  * tokens.
  */
 import { existsSync, readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
@@ -13,6 +14,10 @@ const baseCss = readFileSync(fileURLToPath(new URL('../src/base.css', import.met
 const themeManifest = JSON.parse(
   readFileSync(fileURLToPath(new URL('../../ui-theme/package.json', import.meta.url)), 'utf8'),
 ) as { exports: Record<string, string>; files: string[] }
+const themeBuildConfig = readFileSync(
+  fileURLToPath(new URL('../../ui-theme/tsdown.config.ts', import.meta.url)),
+  'utf8',
+)
 
 /**
  * Import specifiers of the sheet, in source order. Quote style and surrounding
@@ -39,6 +44,8 @@ function resolveThemeSheet(specifier: string): string {
 }
 
 const imports = importOrder(baseCss)
+const angelinaSheet = resolveThemeSheet(`${THEME_PACKAGE}/styles/angelina.css`)
+const angelinaCss = readFileSync(angelinaSheet, 'utf8')
 
 describe('web shell base.css', () => {
   it('publishes theme sheets from the built artifact plane', () => {
@@ -62,5 +69,26 @@ describe('web shell base.css', () => {
     const scrollbar = imports.indexOf(`${THEME_PACKAGE}/styles/scrollbar.css`)
     expect(platform).toBeGreaterThanOrEqual(0)
     expect(scrollbar).toBeGreaterThan(platform)
+  })
+
+  it('ships every relative image referenced by the Angelina sheet', () => {
+    const assets = [...new Set(
+      [...angelinaCss.matchAll(/url\(\s*['"]?(\.\/[^'")]+)['"]?\s*\)/g)]
+        .map(([, asset = '']) => asset),
+    )].sort()
+    expect(assets).toEqual([
+      './assets/angelina-dark-hero.png',
+      './assets/angelina-dark-thread.jpg',
+      './assets/angelina-light-hero.png',
+      './assets/angelina-light-thread.jpg',
+    ])
+    for (const asset of assets) expect(existsSync(resolve(dirname(angelinaSheet), asset)), asset).toBe(true)
+    expect(themeBuildConfig).toContain("{ from: 'src/styles/assets/*', to: 'lib/styles/assets' }")
+  })
+
+  it('keeps theme effects out of frame columns and reaches nested conversation phases', () => {
+    expect(angelinaCss).toContain('[data-ds-conversation-column] [data-phase]')
+    expect(angelinaCss).not.toMatch(/\[data-ds-conversation-column\]\s*>\s*\[data-phase/)
+    expect(angelinaCss).not.toMatch(/\[data-ds-app-frame\][^{]*\{[^}]*backdrop-filter/s)
   })
 })

@@ -3,9 +3,13 @@
 import { runInNewContext } from 'node:vm'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { injectBootTheme } from '../src/boot-theme.ts'
-import type { ThemePreference } from '../src/theme-settings.ts'
+import {
+  THEME_BOOTSTRAP_PREFERENCE_ATTRIBUTE, THEME_BOOTSTRAP_TOKENS_ATTRIBUTE,
+  type ThemePreference,
+} from '../src/theme-settings.ts'
 
 const DARK_ATTRIBUTE = 'data-ds-dark-theme'
+const THEME_ATTRIBUTE = 'data-ds-theme'
 
 function mockSystemDark(matches: boolean): void {
   vi.stubGlobal('matchMedia', vi.fn(() => ({ matches }) as MediaQueryList))
@@ -27,6 +31,10 @@ afterEach(() => {
   vi.unstubAllGlobals()
   document.documentElement.style.removeProperty('color-scheme')
   document.body.removeAttribute(DARK_ATTRIBUTE)
+  document.body.removeAttribute(THEME_ATTRIBUTE)
+  document.body.removeAttribute(THEME_BOOTSTRAP_PREFERENCE_ATTRIBUTE)
+  document.body.removeAttribute(THEME_BOOTSTRAP_TOKENS_ATTRIBUTE)
+  document.body.removeAttribute('style')
 })
 
 describe('theme boot index transform', () => {
@@ -37,6 +45,7 @@ describe('theme boot index transform', () => {
     expect(html.indexOf('<script>')).toBeLessThan(html.indexOf('<div id="root">'))
     expect(document.documentElement.style.colorScheme).toBe('dark')
     expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(true)
+    expect(document.body.getAttribute(THEME_ATTRIBUTE)).toBe('dark')
   })
 
   it('lets durable light override a dark OS and clears stale dark state', () => {
@@ -45,6 +54,7 @@ describe('theme boot index transform', () => {
     executeBootstrap('light')
     expect(document.documentElement.style.colorScheme).toBe('light')
     expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(false)
+    expect(document.body.getAttribute(THEME_ATTRIBUTE)).toBe('light')
   })
 
   it.each([
@@ -55,6 +65,7 @@ describe('theme boot index transform', () => {
     executeBootstrap('system')
     expect(document.documentElement.style.colorScheme).toBe(colorScheme)
     expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(dark)
+    expect(document.body.getAttribute(THEME_ATTRIBUTE)).toBe(colorScheme)
   })
 
   it('defaults to system and falls back to light when matchMedia is unavailable', () => {
@@ -62,6 +73,18 @@ describe('theme boot index transform', () => {
     executeBootstrap()
     expect(document.documentElement.style.colorScheme).toBe('light')
     expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(false)
+    expect(document.body.getAttribute(THEME_ATTRIBUTE)).toBe('light')
+  })
+
+  it('applies the Angelina theme id, scheme, tokens, and bootstrap preference before plugins load', () => {
+    executeBootstrap('angelina-dark')
+    expect(document.documentElement.style.colorScheme).toBe('dark')
+    expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(true)
+    expect(document.body.getAttribute(THEME_ATTRIBUTE)).toBe('angelina-dark')
+    expect(document.body.getAttribute(THEME_BOOTSTRAP_PREFERENCE_ATTRIBUTE)).toBe('angelina-dark')
+    expect(document.body.getAttribute(THEME_BOOTSTRAP_TOKENS_ATTRIBUTE)?.split(/\s+/))
+      .toContain('--dsw-alias-brand-primary')
+    expect(document.body.style.getPropertyValue('--dsw-alias-brand-primary')).toBe('#c85b55')
   })
 
   it('appends the script to a body-less fragment', () => {

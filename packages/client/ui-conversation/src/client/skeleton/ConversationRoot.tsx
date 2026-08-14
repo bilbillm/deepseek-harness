@@ -157,7 +157,10 @@ export function ConversationRoot({
   })
 
   const composerBar = (
-    <div className={clsx(css.composerStack, hero && css.composerHero)}>
+    <div
+      className={clsx(css.composerStack, hero && css.composerHero)}
+      data-ds-composer-mode={hero ? 'hero' : 'active'}
+    >
       {hero && <HeroGlow className={css.heroGlow} />}
       {hero && <HeroShell t={t} />}
       {hero && heroWorkspaceRow}

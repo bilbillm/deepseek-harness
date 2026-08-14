@@ -1,6 +1,6 @@
 /**
  * Appearance preference row registered into the General section item slot
- * (figma 501:30012 'Frame 2117131228'): title + three preference cubes.
+ * (figma 501:30012 'Frame 2117131228'): title + preference previews.
  * Registered by this package — the theme feature owns its own settings
  * surface. Selection follows the persisted preference, never the resolved
  * active theme.
@@ -27,11 +27,18 @@ export type AppearanceRowComponentProps =
   PropsRuntime<'settings.general.item'> & PropsStore<ReturnType<typeof createAppearanceRowStore>>
   & PropsLocale<'settings.theme'> & AppearanceRowInjected
 
-/** Cube order and icons (figma 501:30015-30017: Light, Dark, System). */
-const CUBES: readonly { id: ThemePreference; labelKey: ThemeKey; Icon: typeof IconLightOutline16 }[] = [
-  { id: 'light', labelKey: 'appearance.light', Icon: IconLightOutline16 },
-  { id: 'dark', labelKey: 'appearance.dark', Icon: IconDarkOutline16 },
-  { id: 'system', labelKey: 'appearance.system', Icon: IconFollowsystemOutline16 },
+/** Preference order and preview treatments. */
+const CUBES: readonly {
+  id: ThemePreference
+  labelKey: ThemeKey
+  Icon: typeof IconLightOutline16
+  preview: 'light' | 'dark' | 'system' | 'angelina-light' | 'angelina-dark'
+}[] = [
+  { id: 'light', labelKey: 'appearance.light', Icon: IconLightOutline16, preview: 'light' },
+  { id: 'dark', labelKey: 'appearance.dark', Icon: IconDarkOutline16, preview: 'dark' },
+  { id: 'system', labelKey: 'appearance.system', Icon: IconFollowsystemOutline16, preview: 'system' },
+  { id: 'angelina-light', labelKey: 'appearance.angelinaLight', Icon: IconLightOutline16, preview: 'angelina-light' },
+  { id: 'angelina-dark', labelKey: 'appearance.angelinaDark', Icon: IconDarkOutline16, preview: 'angelina-dark' },
 ]
 
 /**
@@ -45,7 +52,7 @@ export function AppearanceRow({ t, setTheme, useStore }: AppearanceRowComponentP
     <div className={css.group}>
       <div className={css.title}>{t('appearance.title')}</div>
       <div className={css.cubeRow}>
-        {CUBES.map(({ id, labelKey, Icon }) => (
+        {CUBES.map(({ id, labelKey, Icon, preview }) => (
           <button
             key={id}
             type="button"
@@ -53,8 +60,11 @@ export function AppearanceRow({ t, setTheme, useStore }: AppearanceRowComponentP
             aria-pressed={preference === id}
             onClick={() => { setTheme(id) }}
           >
-            <Icon />
-            {t(labelKey)}
+            <span className={css.preview} data-preview={preview} aria-hidden="true">
+              <span className={css.previewRail} />
+              <span className={css.previewPanel} />
+            </span>
+            <span className={css.label}><Icon />{t(labelKey)}</span>
           </button>
         ))}
       </div>

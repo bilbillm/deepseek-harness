@@ -5,7 +5,10 @@ export default clientBundle(
   ['lib/types/index.js', 'lib/types/invariant.js'],
   {
     lib: {
-      copy: [{ from: 'src/styles/*', to: 'lib/styles' }],
+      copy: [
+        { from: 'src/styles/*', to: 'lib/styles' },
+        { from: 'src/styles/assets/*', to: 'lib/styles/assets' },
+      ],
     },
   },
 )

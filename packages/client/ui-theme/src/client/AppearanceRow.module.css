@@ -17,26 +17,23 @@
 }
 
 .cubeRow {
-  display: flex;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 8px;
-  flex-wrap: wrap;
 }
 
 /* Appearance cube (figma '.Selector Cube' 276x82 r16, pad 20/32, centered
  * icon-over-label column, gap 4); flexed down from the figma width so all
- * three sit on one row in the 800 panel, wrapping when narrower. */
+ * five fit the 800 panel as a responsive grid, wrapping when narrower. */
 .themeCube {
   box-sizing: border-box;
-  flex: 1 1 180px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 20px 32px;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
   border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 16px;
+  border-radius: 8px;
   background: transparent;
   font: inherit;
   font-size: 14px;
@@ -45,13 +42,100 @@
   cursor: pointer;
 }
 
+.preview {
+  --dsh-theme-preview-bg: var(--dsw-static-neutral-bluish-60);
+  --dsh-theme-preview-rail: var(--dsw-static-neutral-bluish-100);
+  --dsh-theme-preview-rail-border: var(--dsw-alias-border-l2);
+  --dsh-theme-preview-panel: var(--dsw-static-neutral-bluish-00);
+
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 5px;
+  background: var(--dsh-theme-preview-bg);
+  background-image: var(--dsh-theme-preview-image, none);
+  background-position: var(--dsh-theme-preview-position, center);
+  background-size: cover;
+}
+
+.previewRail,
+.previewPanel {
+  position: absolute;
+  display: block;
+}
+
+.previewRail {
+  inset: 0 auto 0 0;
+  width: 26%;
+  background: var(--dsh-theme-preview-rail);
+  border-right: 1px solid var(--dsh-theme-preview-rail-border);
+}
+
+.previewPanel {
+  right: 8%;
+  bottom: 12%;
+  width: 46%;
+  height: 24%;
+  border-radius: 4px;
+  background: var(--dsh-theme-preview-panel);
+  box-shadow: var(--dsw-shadow-lv1);
+}
+
+.preview[data-preview='dark'] {
+  --dsh-theme-preview-bg: var(--dsw-static-neutral-bluish-950);
+  --dsh-theme-preview-rail: var(--dsw-static-neutral-bluish-900);
+  --dsh-theme-preview-rail-border: var(--dsw-alias-border-inverted2);
+  --dsh-theme-preview-panel: var(--dsw-static-neutral-bluish-850);
+}
+
+.preview[data-preview='system'] {
+  --dsh-theme-preview-bg: linear-gradient(
+    135deg,
+    var(--dsw-static-neutral-bluish-60) 0 50%,
+    var(--dsw-static-neutral-bluish-950) 50% 100%
+  );
+  --dsh-theme-preview-rail: linear-gradient(
+    135deg,
+    var(--dsw-static-neutral-bluish-100) 0 50%,
+    var(--dsw-static-neutral-bluish-900) 50% 100%
+  );
+  --dsh-theme-preview-panel: linear-gradient(
+    135deg,
+    var(--dsw-static-neutral-bluish-00) 0 50%,
+    var(--dsw-static-neutral-bluish-850) 50% 100%
+  );
+}
+
+.preview[data-preview^='angelina'] .previewRail {
+  background: var(--dsh-theme-preview-rail);
+  border-color: var(--dsh-theme-preview-rail-border);
+  backdrop-filter: blur(2px);
+}
+
+.preview[data-preview^='angelina'] .previewPanel {
+  background: var(--dsh-theme-preview-panel);
+  backdrop-filter: blur(3px);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 22px;
+  text-align: center;
+}
+
 .themeCube:hover:not(.selected) {
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
-/* Selected cube: #F5F6F7 fill + #ADB2B8 border (static token — the bluish-400
- * step has no alias-layer name). */
+/* Selected previews use the active theme accent and retain stable dimensions. */
 .selected {
   background: var(--dsw-alias-bg-module-platform);
-  border-color: var(--dsw-static-neutral-bluish-400);
+  border-color: var(--dsw-alias-brand-primary);
+  box-shadow: 0 0 0 1px var(--dsw-alias-brand-primary);
 }
