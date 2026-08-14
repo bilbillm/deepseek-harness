@@ -1,5 +1,3 @@
-import type { ThemePreference } from '../theme-settings.ts'
-
 const ROOT_ID = 'dsh-angelina-parallax'
 const ROOT_ATTRIBUTE = 'data-dsh-angelina-parallax'
 const ROOT_OWNER_ATTRIBUTE = 'data-dsh-angelina-parallax-owner'
@@ -65,13 +63,13 @@ export class AngelinaParallaxController {
    * Synchronize the owned layers with the active theme id.
    * @param themeId - resolved theme id from the ThemeSnapshot.
    */
-  sync(themeId: ThemePreference | string): void {
+  sync(themeId: string): void {
     const nextMode = modeForTheme(themeId)
     if (nextMode === undefined) {
       this.disable()
       return
     }
-    if (typeof document === 'undefined' || document.body === null) return
+    if (typeof document === 'undefined') return
 
     this.captureBodyState()
     this.mode = nextMode
@@ -98,7 +96,7 @@ export class AngelinaParallaxController {
   }
 
   private captureBodyState(): void {
-    if (this.bodyStateCaptured || typeof document === 'undefined' || document.body === null) return
+    if (this.bodyStateCaptured || typeof document === 'undefined') return
     this.bodyStateCaptured = true
     this.previousAttribute = document.body.getAttribute(ROOT_ATTRIBUTE)
   }
@@ -188,7 +186,7 @@ export class AngelinaParallaxController {
 
   private disable(): void {
     this.detachPointerListeners()
-    if (this.frame !== 0 && typeof window !== 'undefined') window.cancelAnimationFrame?.(this.frame)
+    if (this.frame !== 0 && typeof window !== 'undefined') window.cancelAnimationFrame(this.frame)
     this.frame = 0
     this.targetX = 0
     this.targetY = 0
@@ -197,7 +195,7 @@ export class AngelinaParallaxController {
     this.root = undefined
     this.background = undefined
     this.foreground = undefined
-    if (!this.bodyStateCaptured || typeof document === 'undefined' || document.body === null) return
+    if (!this.bodyStateCaptured || typeof document === 'undefined') return
 
     if (this.previousAttribute === null) document.body.removeAttribute(ROOT_ATTRIBUTE)
     else document.body.setAttribute(ROOT_ATTRIBUTE, this.previousAttribute)

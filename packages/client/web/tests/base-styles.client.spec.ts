@@ -78,11 +78,9 @@ describe('web shell base.css', () => {
     )].sort()
     expect(assets).toEqual([
       './assets/angelina-dark-hero.png',
-      './assets/angelina-dark-thread.jpg',
       './assets/angelina-light-hero.png',
       './assets/angelina-light-parallax-background.png',
       './assets/angelina-light-parallax-foreground.png',
-      './assets/angelina-light-thread.jpg',
     ])
     for (const asset of assets) expect(existsSync(resolve(dirname(angelinaSheet), asset)), asset).toBe(true)
     expect(themeBuildConfig).toContain("{ from: 'src/styles/assets/*', to: 'lib/styles/assets' }")

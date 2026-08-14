@@ -10,7 +10,7 @@ let mediaListeners = new Set<MediaListener>()
 
 const flushFrame = (): void => {
   const pending = frames.splice(0)
-  pending.forEach(callback => callback(0))
+  pending.forEach((callback) => { callback(0) })
 }
 
 const pointer = (clientX: number, clientY: number, pointerType = 'mouse'): void => {
@@ -44,10 +44,8 @@ describe('AngelinaParallaxController', () => {
       removeEventListener: (_type: string, listener: EventListenerOrEventListenerObject): void => {
         mediaListeners.delete(listener as MediaListener)
       },
-      addListener: (): void => {},
-      removeListener: (): void => {},
       dispatchEvent: (): boolean => true,
-    } as MediaQueryList))
+    } as unknown as MediaQueryList))
   })
 
   afterEach(() => {
@@ -97,7 +95,7 @@ describe('AngelinaParallaxController', () => {
       .toContain('translate3d(0px, 0px, 0)')
 
     mediaMatches = false
-    mediaListeners.forEach(listener => listener())
+    mediaListeners.forEach((listener) => { listener() })
     pointer(window.innerWidth, window.innerHeight)
     flushFrame()
     expect(document.querySelector('[data-dsh-angelina-layer="background"]')?.getAttribute('style'))
