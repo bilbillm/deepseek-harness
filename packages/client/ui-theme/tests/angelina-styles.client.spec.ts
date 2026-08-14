@@ -26,4 +26,11 @@ body[data-dsh-angelina-parallax] [data-ds-conversation-column] [data-phase='acti
     expect(angelinaCss).not.toContain("[data-ds-composer-mode='hero']")
     expect(angelinaCss).not.toContain('--dsh-angelina-copy-parallax-')
   })
+
+  it('softens active artwork behind conversation copy', () => {
+    const active = angelinaCss.match(/\[data-phase='active'\] \[data-conversation-scroll\] \{([^}]*)\}/s)?.[1] ?? ''
+    expect(active).toContain('14%')
+    expect(active).toContain('-webkit-backdrop-filter: blur(3px)')
+    expect(active).toContain('backdrop-filter: blur(3px)')
+  })
 })

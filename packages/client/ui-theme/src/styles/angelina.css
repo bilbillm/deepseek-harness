@@ -82,7 +82,8 @@ body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='hero
 
 body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='active'] [data-conversation-scroll] {
   background: color-mix(in srgb, var(--dsw-alias-bg-base) 14%, transparent);
-  backdrop-filter: none;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
 }
 
 body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='active'] [data-composer-seat] {
@@ -215,6 +216,7 @@ body[data-dsh-angelina-parallax] [data-ds-conversation-column] [data-phase='acti
 
 @media (prefers-reduced-transparency: reduce) {
   body[data-ds-theme^='angelina-'] [data-ds-conversation-column] [data-phase='active'] [data-conversation-scroll] {
+    -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
 
