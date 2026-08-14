@@ -68,8 +68,8 @@ describe('AngelinaParallaxController', () => {
       .toContain('translate3d(-5px, -3px, 0)')
     expect(document.querySelector('[data-dsh-angelina-layer="foreground"]')?.getAttribute('style'))
       .toContain('translate3d(10px, 6px, 0)')
-    expect(document.body.style.getPropertyValue('--dsh-angelina-copy-parallax-x')).toBe('4px')
-    expect(document.body.style.getPropertyValue('--dsh-angelina-copy-parallax-y')).toBe('2.5px')
+    expect(document.body.style.getPropertyValue('--dsh-angelina-copy-parallax-x')).toBe('')
+    expect(document.body.style.getPropertyValue('--dsh-angelina-copy-parallax-y')).toBe('')
     controller.dispose()
   })
 
@@ -81,7 +81,8 @@ describe('AngelinaParallaxController', () => {
     pointer(window.innerWidth, window.innerHeight)
     window.dispatchEvent(new Event('blur'))
     flushFrame()
-    expect(document.body.style.getPropertyValue('--dsh-angelina-copy-parallax-x')).toBe('0px')
+    expect(document.querySelector('[data-dsh-angelina-layer="background"]')?.getAttribute('style'))
+      .toContain('translate3d(0px, 0px, 0)')
     document.dispatchEvent(new Event('visibilitychange'))
     controller.dispose()
   })
@@ -104,12 +105,17 @@ describe('AngelinaParallaxController', () => {
     controller.dispose()
   })
 
-  it('restores pre-existing body state when disabled or disposed', () => {
+  it('restores its body attribute without changing unrelated body styles', () => {
     document.body.setAttribute('data-dsh-angelina-parallax', 'owned-by-test')
     document.body.style.setProperty('--dsh-angelina-copy-parallax-x', '9px')
     document.body.style.setProperty('--dsh-angelina-copy-parallax-y', '7px')
     const controller = new AngelinaParallaxController()
     controller.sync('angelina-light')
+    pointer(window.innerWidth, window.innerHeight)
+    flushFrame()
+
+    expect(document.body.style.getPropertyValue('--dsh-angelina-copy-parallax-x')).toBe('9px')
+    expect(document.body.style.getPropertyValue('--dsh-angelina-copy-parallax-y')).toBe('7px')
     controller.sync('system')
 
     expect(document.body.getAttribute('data-dsh-angelina-parallax')).toBe('owned-by-test')
@@ -124,7 +130,8 @@ describe('AngelinaParallaxController', () => {
     const controller = new AngelinaParallaxController()
     controller.sync('angelina-light')
     pointer(window.innerWidth, window.innerHeight)
-    expect(document.body.style.getPropertyValue('--dsh-angelina-copy-parallax-x')).toBe('4px')
+    expect(document.querySelector('[data-dsh-angelina-layer="background"]')?.getAttribute('style'))
+      .toContain('translate3d(-5px, -3px, 0)')
     controller.dispose()
   })
 })

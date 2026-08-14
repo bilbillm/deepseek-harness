@@ -3,8 +3,6 @@ import type { ThemePreference } from '../theme-settings.ts'
 const ROOT_ID = 'dsh-angelina-parallax'
 const ROOT_ATTRIBUTE = 'data-dsh-angelina-parallax'
 const ROOT_OWNER_ATTRIBUTE = 'data-dsh-angelina-parallax-owner'
-const COPY_X = '--dsh-angelina-copy-parallax-x'
-const COPY_Y = '--dsh-angelina-copy-parallax-y'
 
 type AngelinaMode = 'light' | 'dark'
 
@@ -18,7 +16,7 @@ const px = (value: number): string => `${Math.round(value * 100) / 100}px`
 
 /**
  * Owns the pointer-driven Angelina background layers and their teardown.
- * The controller only writes its namespaced body variables and DOM nodes;
+ * The controller only writes its namespaced body attribute and artwork nodes;
  * the theme stylesheet remains responsible for positioning and visibility.
  */
 export class AngelinaParallaxController {
@@ -32,8 +30,6 @@ export class AngelinaParallaxController {
   private listenersAttached = false
   private bodyStateCaptured = false
   private previousAttribute: string | null = null
-  private previousCopyX = ''
-  private previousCopyY = ''
   private reducedMotion: MediaQueryList | undefined
   private reducedMotionListenerAttached = false
 
@@ -105,8 +101,6 @@ export class AngelinaParallaxController {
     if (this.bodyStateCaptured || typeof document === 'undefined' || document.body === null) return
     this.bodyStateCaptured = true
     this.previousAttribute = document.body.getAttribute(ROOT_ATTRIBUTE)
-    this.previousCopyX = document.body.style.getPropertyValue(COPY_X)
-    this.previousCopyY = document.body.style.getPropertyValue(COPY_Y)
   }
 
   private ensureRoot(): void {
@@ -182,17 +176,12 @@ export class AngelinaParallaxController {
 
   private writeParallax(x: number, y: number, force = false): void {
     if (!force && x === this.targetX && y === this.targetY && this.frame !== 0) return
-    if (this.root === undefined || this.background === undefined || this.foreground === undefined || document.body === null) return
+    if (this.root === undefined || this.background === undefined || this.foreground === undefined) return
 
     const foregroundX = this.mode === 'light' ? x * 10 : x * 5
     const foregroundY = this.mode === 'light' ? y * 6 : y * 3
     const backgroundX = this.mode === 'light' ? x * -5 : x * 0.5
     const backgroundY = this.mode === 'light' ? y * -3 : y * 0.25
-    const copyX = this.mode === 'light' ? x * 4 : x * 1.5
-    const copyY = this.mode === 'light' ? y * 2.5 : y * 1
-
-    document.body.style.setProperty(COPY_X, px(copyX))
-    document.body.style.setProperty(COPY_Y, px(copyY))
     this.background.style.transform = `translate3d(${px(backgroundX)}, ${px(backgroundY)}, 0)`
     this.foreground.style.transform = `translate3d(${px(foregroundX)}, ${px(foregroundY)}, 0)`
   }
@@ -212,10 +201,6 @@ export class AngelinaParallaxController {
 
     if (this.previousAttribute === null) document.body.removeAttribute(ROOT_ATTRIBUTE)
     else document.body.setAttribute(ROOT_ATTRIBUTE, this.previousAttribute)
-    if (this.previousCopyX === '') document.body.style.removeProperty(COPY_X)
-    else document.body.style.setProperty(COPY_X, this.previousCopyX)
-    if (this.previousCopyY === '') document.body.style.removeProperty(COPY_Y)
-    else document.body.style.setProperty(COPY_Y, this.previousCopyY)
     this.bodyStateCaptured = false
   }
 }

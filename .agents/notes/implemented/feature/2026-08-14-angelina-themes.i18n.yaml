@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-14-angelina-themes.md
-2026-08-14-angelina-themes.md: 9e4f966bb0dff651b968957172417b2ed534fdba
-2026-08-14-angelina-themes.zh.md: b977d29241e9e8b78abd3adf6b77b6ecb1575242
+2026-08-14-angelina-themes.md: d82c835d9830ca8af00f0207f6c0470c84bcb864
+2026-08-14-angelina-themes.zh.md: 1c4270e137fd09ef11f43cc2a368816c757a4a95
