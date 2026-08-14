@@ -14,7 +14,7 @@ const ANGELINA_LIGHT_TOKENS: ThemeTokens = Object.freeze({
   '--dsw-alias-bg-mask-drop': 'rgba(251, 250, 248, 0.78)',
   '--dsw-alias-bg-module-platform': 'rgba(244, 241, 237, 0.9)',
   '--dsw-alias-bg-multi-select': 'rgba(216, 111, 99, 0.14)',
-  '--dsw-alias-bg-overlay': 'rgba(251, 250, 248, 0.98)',
+  '--dsw-alias-bg-overlay': 'rgba(251, 250, 248, 0.9)',
   '--dsw-alias-bg-primary': 'rgba(251, 250, 248, 0.94)',
   '--dsw-alias-bg-skeleton': 'rgba(158, 47, 46, 0.08)',
   '--dsw-alias-border-inverted2': 'rgba(251, 250, 248, 0.16)',
@@ -93,10 +93,10 @@ const ANGELINA_LIGHT_TOKENS: ThemeTokens = Object.freeze({
   '--dsw-alias-tooltip-bg': '#352f30',
   '--dsw-specific-bubble-highlight': '#edc9c3',
   '--dsw-specific-bubble': '#f4e5e1',
-  '--dsw-specific-input-major': 'rgba(251, 250, 248, 0.96)',
+  '--dsw-specific-input-major': 'rgba(251, 250, 248, 0.78)',
   '--dsw-specific-login-input': '#f6f1ed',
-  '--dsw-specific-menu': 'rgba(251, 250, 248, 0.98)',
-  '--dsw-specific-selector': '#f0e4df',
+  '--dsw-specific-menu': 'rgba(251, 250, 248, 0.84)',
+  '--dsw-specific-selector': 'rgba(240, 228, 223, 0.68)',
   '--dsw-specific-sidebar-fill': 'rgba(244, 241, 237, 0.96)',
   '--dsw-specific-sidebar-nav-item-active-accent': '#edd3cd',
   '--dsw-specific-sidebar-nav-item-active': '#eadbd6',
@@ -131,7 +131,7 @@ const ANGELINA_DARK_TOKENS: ThemeTokens = Object.freeze({
   '--dsw-alias-bg-mask-drop': 'rgba(8, 13, 19, 0.82)',
   '--dsw-alias-bg-module-platform': 'rgba(26, 36, 45, 0.94)',
   '--dsw-alias-bg-multi-select': 'rgba(200, 91, 85, 0.2)',
-  '--dsw-alias-bg-overlay': 'rgba(34, 46, 56, 0.98)',
+  '--dsw-alias-bg-overlay': 'rgba(34, 46, 56, 0.88)',
   '--dsw-alias-bg-primary': 'rgba(17, 24, 32, 0.95)',
   '--dsw-alias-bg-skeleton': 'rgba(231, 132, 118, 0.12)',
   '--dsw-alias-border-inverted2': 'rgba(242, 240, 237, 0.12)',
@@ -210,10 +210,10 @@ const ANGELINA_DARK_TOKENS: ThemeTokens = Object.freeze({
   '--dsw-alias-tooltip-bg': '#303840',
   '--dsw-specific-bubble-highlight': '#593637',
   '--dsw-specific-bubble': '#34282b',
-  '--dsw-specific-input-major': 'rgba(17, 24, 32, 0.96)',
+  '--dsw-specific-input-major': 'rgba(17, 24, 32, 0.74)',
   '--dsw-specific-login-input': '#0d141b',
-  '--dsw-specific-menu': 'rgba(34, 46, 56, 0.98)',
-  '--dsw-specific-selector': '#26313a',
+  '--dsw-specific-menu': 'rgba(34, 46, 56, 0.82)',
+  '--dsw-specific-selector': 'rgba(38, 49, 58, 0.72)',
   '--dsw-specific-sidebar-fill': 'rgba(8, 13, 19, 0.96)',
   '--dsw-specific-sidebar-nav-item-active-accent': '#4a3032',
   '--dsw-specific-sidebar-nav-item-active': '#342b2e',
@@ -244,7 +244,12 @@ export const BUILTIN_THEMES: readonly ThemeDefinition[] = Object.freeze([
   Object.freeze({ id: 'angelina-dark', colorScheme: 'dark' as const, tokens: ANGELINA_DARK_TOKENS }),
 ])
 
-/** Resolve one persisted preference to a concrete built-in theme id. */
+/**
+ * Resolve one persisted preference to a concrete built-in theme id.
+ * @param preference - persisted theme preference or registered theme id.
+ * @param systemDark - whether the current system color scheme is dark.
+ * @returns the concrete built-in theme id to render.
+ */
 export function resolveBuiltinThemeId(
   preference: string,
   systemDark: boolean,

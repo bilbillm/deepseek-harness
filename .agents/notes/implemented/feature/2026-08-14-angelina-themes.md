@@ -14,7 +14,9 @@ The fork ships `angelina-light` and `angelina-dark` as first-class built-in pref
 
 Each Angelina definition overrides exactly the semantic CSS-variable vocabulary declared or consumed by the assembled Web client. A repository-scanning test derives that vocabulary from package styles, requires both definitions to cover the same complete set, and rejects stale or unused entries. The definitions are frozen and retain their own `colorScheme`, so native controls and the stock dark-palette attribute never infer scheme from an id string.
 
-The global `angelina.css` sheet owns the image presentation. ui-layout and ui-conversation expose theme-neutral state markers for the app frame, conversation column, and composer mode; feature styles do not branch on Angelina ids. Empty conversations use the sharp hero image with a left-side composer safe area, active conversations use the softened thread image, and narrow viewports move the focal point and return the composer to centered flow. Four raster assets live under the theme package and are copied with the published style artifact.
+The global `angelina.css` sheet owns the image presentation. ui-layout and ui-conversation expose theme-neutral state markers for the app frame, conversation column, and composer mode; feature styles do not branch on Angelina ids. Empty conversations use sharp hero art with a left-side composer safe area, while active conversations use a lightly softened thread image that preserves character and environment detail. Input fields, composers, menus, listboxes, and dialogs receive glass treatment at their leaf surfaces; frame and sidebar ancestors remain unfiltered so fixed overlays keep viewport positioning.
+
+Six raster assets live under the theme package and are copied with the published style artifact. `AngelinaParallaxController` reproduces the Codex light theme's two-layer pointer response with the original foreground, rear plate, and copy amplitudes. The dark theme degrades to one restrained moving background because it has no separated foreground plate. Pointer state resets on blur or page hiding, touch input is ignored, and narrow viewports and `prefers-reduced-motion` render stationary layers.
 
 At 600px and below, the shared Settings shell stacks its fixed rail into a compact two-by-two top navigation. This preserves a readable options column and lets the five Appearance previews remain selectable without horizontal overflow.
 
@@ -26,7 +28,7 @@ The Host bootstrap applies the selected Angelina tokens and resolved theme attri
 
 ## Alternatives considered
 
-**Ship a standalone third-party plugin.** Rejected for this fork: it would load after the shell, use a second settings row or settings namespace, and could not make the selected wallpaper palette authoritative during the pre-plugin interval. The registry path remains the right answer for independently distributed themes.
+**Use only a standalone third-party plugin.** Rejected as the fork's sole integration: a plugin loads after the shell, owns a second settings row and namespace, and cannot make its selected palette authoritative during the pre-plugin interval. A standalone companion remains the distribution path for other DeepSeek Harness installations, while the fork's built-in integration owns first paint and native preference persistence.
 
 **Inject one fixed background layer and leave stock tokens in place.** Rejected: the Codex themes coordinate background art with every major semantic surface. Stock blue-gray panels over the Angelina imagery reduce contrast and make the result a wallpaper overlay rather than a theme.
 
@@ -34,8 +36,8 @@ The Host bootstrap applies the selected Angelina tokens and resolved theme attri
 
 ## Consequences
 
-The Appearance row now presents five responsive previews and persists either Angelina variant through the same Host-backed path as the neutral preferences. First paint, the loading shell, empty conversations, active conversations, settings surfaces, code blocks, and native browser chrome share one resolved scheme and token authority. The Web bundle grows by four images and one stylesheet; the asset-copy contract and CSS references are tested. Changing the Web semantic-token vocabulary now requires updating both Angelina palettes deliberately.
+The Appearance row presents five responsive previews and persists either Angelina variant through the same Host-backed path as the neutral preferences. First paint, the loading shell, empty conversations, active conversations, glass surfaces, code blocks, and native browser chrome share one resolved scheme and token authority. The Web bundle includes six theme images, one stylesheet, and a disposable pointer controller; asset references, motion limits, and cleanup are tested. Changing the Web semantic-token set requires updating both Angelina palettes deliberately.
 
 ## Testing
 
-Unit coverage pins the five-value settings schema, bootstrap theme id and token handoff, ThemeRuntime persistence, five-preview settings row, ThemePresenter cleanup, complete token vocabulary, stylesheet imports, and all four published image references. Type checking and full package builds cover the Host/client boundary and emitted assets. Browser acceptance covers both themes on desktop and mobile across empty conversation, active conversation, and Settings states.
+Unit coverage pins the five-value settings schema, bootstrap theme id and token handoff, ThemeRuntime persistence, five-preview settings row, ThemePresenter cleanup, complete token set, stylesheet imports, all six published image references, exact light-theme parallax amplitudes, the restrained dark fallback, reduced motion, and disposal. Type checking and full package builds cover the Host/client split and emitted assets. Browser acceptance covers both themes on desktop and mobile across empty conversation, active conversation, Settings, glass overlays, and pointer movement.

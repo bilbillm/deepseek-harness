@@ -1,11 +1,12 @@
 /**
  * Browser theme registry over the `--dsw-*` token stylesheets. The service
  * owns the live theme preference, resolves `system` through
- * `prefers-color-scheme`, and publishes immutable snapshots; it never touches
- * the DOM — ui-layout's presenter consumes the resolved snapshot. The Host
- * settings scope loads and stores the preference in the user-settings
- * document. The plugin also registers the Appearance preference row into the
- * settings General section — the theme feature owns its own settings surface.
+ * `prefers-color-scheme`, and publishes immutable snapshots; ThemeRuntime
+ * remains DOM-free while the apply function owns the optional Angelina visual
+ * controller. The Host settings scope loads and stores the preference in the
+ * user-settings document. The plugin also registers the Appearance preference
+ * row into the settings General section — the theme feature owns its own
+ * settings surface.
  */
 import type { Context } from '@deepseek-ai/cordis'
 import type { BoundActions } from '@deepseek-ai/dsh-client-ui-slots'
@@ -18,6 +19,7 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type { AppearanceRowInjected } from './AppearanceRow.tsx'
 import { AppearanceRow } from './AppearanceRow.tsx'
 import { createAppearanceRowStore } from './settings-store.ts'
+import { AngelinaParallaxController } from './angelina-parallax.ts'
 import { en, zh, type ThemeKey } from './locales.ts'
 import { BUILTIN_THEMES, resolveBuiltinThemeId } from '../builtin-themes.ts'
 import type { ThemeDefinition, ThemeTokens } from '../theme-definition.ts'
@@ -379,6 +381,16 @@ export function apply(ctx: ClientContext): void {
   const host = ctx.settingsScope.bind<ThemeSettings>({ namespace: THEME_SETTINGS_NAMESPACE })
   const theme = new ThemeRuntime(ctx, host, consumeBootstrapPreference())
   ctx.provide('theme', theme)
+
+  ctx.effect(() => {
+    const parallax = new AngelinaParallaxController()
+    parallax.sync(theme.getTheme().active.id)
+    const off = ctx.on('theme/change', (snapshot) => { parallax.sync(snapshot.active.id) })
+    return () => {
+      off()
+      parallax.dispose()
+    }
+  }, 'ui-theme: Angelina parallax presentation')
 
   ctx.effect(() => ctx.locale.register(SETTINGS_NS, { zh, en }), 'ui-theme: settings row dictionaries')
 

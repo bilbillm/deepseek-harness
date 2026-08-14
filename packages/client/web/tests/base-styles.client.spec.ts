@@ -80,6 +80,8 @@ describe('web shell base.css', () => {
       './assets/angelina-dark-hero.png',
       './assets/angelina-dark-thread.jpg',
       './assets/angelina-light-hero.png',
+      './assets/angelina-light-parallax-background.png',
+      './assets/angelina-light-parallax-foreground.png',
       './assets/angelina-light-thread.jpg',
     ])
     for (const asset of assets) expect(existsSync(resolve(dirname(angelinaSheet), asset)), asset).toBe(true)
@@ -90,5 +92,12 @@ describe('web shell base.css', () => {
     expect(angelinaCss).toContain('[data-ds-conversation-column] [data-phase]')
     expect(angelinaCss).not.toMatch(/\[data-ds-conversation-column\]\s*>\s*\[data-phase/)
     expect(angelinaCss).not.toMatch(/\[data-ds-app-frame\][^{]*\{[^}]*backdrop-filter/s)
+    expect(angelinaCss).toContain('[data-composer-card]')
+    expect(angelinaCss).toContain("[role='menu']")
+    expect(angelinaCss).toMatch(/\[role='dialog'\]\s*\{[^}]*--dsh-angelina-glass-dialog/s)
+    expect(angelinaCss.match(/body\[data-ds-theme\^='angelina-'\] :where\(/g)).toHaveLength(2)
+    expect(angelinaCss).toMatch(/\[data-composer-card\] :is\(textarea,[^}]*backdrop-filter: none/s)
+    expect(angelinaCss).toContain('data-dsh-angelina-parallax')
+    expect(angelinaCss).not.toContain('backdrop-filter: blur(1.5px)')
   })
 })
